@@ -16,6 +16,14 @@
     }
 </script>
 
+<script id="poly-direct-sun" type="x-shader/x-fragment">
+    precision mediump float;
+
+    void main(void) {
+        gl_FragColor = vec4(0.8, 1.0, 1.0, 1.0);
+    }
+</script>
+
 <script id="set-position-shader" type="x-shader/x-vertex">
     attribute vec3 aVertexPosition;
 
@@ -88,11 +96,13 @@ var shaderProgram;
 
 function initShaders() {
   var polyShadowShader = getShader(gl, "poly-shadow");
+  var polyDirectSunShader = getShader(gl, "poly-direct-sun");
   var setPositionShader = getShader(gl, "set-position-shader");
 
   shaderProgram = gl.createProgram();
   gl.attachShader(shaderProgram, setPositionShader);
   gl.attachShader(shaderProgram, polyShadowShader);
+  // gl.attachShader(shaderProgram, polyDirectSunShader);
   gl.linkProgram(shaderProgram);
 
   if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
@@ -119,36 +129,17 @@ function setMatrixUniforms() {
 
 
 
-var triangleVertexPositionBuffer;
 var squareVertexPositionBuffer;
 
-function initBuffers() {
 
-  bufferTriangleVerticies([
-         0.0,  1.0,  0.0,
-        -1.0, -1.0,  0.0,
-         1.0, -1.0,  0.0
-    ])
-  bufferSquareVerticies([
-         1.0,  1.0,  0.0,
-        -1.0,  1.0,  0.0,
-         1.0, -1.0,  0.0,
-        -1.0, -1.0,  0.0
-    ])
-
-  gl.clearColor(1.0, 1.0, 1.0, 1.0);
-  gl.enable(gl.DEPTH_TEST);
-
-}
-
-
-function bufferTriangleVerticies(verticies) {
-
-  triangleVertexPositionBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
+function bufferVerticies(verticies) {
+  vertexPositionBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verticies), gl.STATIC_DRAW);
-  triangleVertexPositionBuffer.itemSize = 3;
-  triangleVertexPositionBuffer.numItems = 3;
+  vertexPositionBuffer.itemSize = 3;
+  vertexPositionBuffer.numItems = 3;
+
+  return vertexPositionBuffer
 }
 
 function bufferSquareVerticies(verticies) {
@@ -160,7 +151,9 @@ function bufferSquareVerticies(verticies) {
 }
 
 
-function drawScene() {
+function setCamera() {
+  gl.clearColor(1.0, 1.0, 1.0, 1.0);
+  gl.enable(gl.DEPTH_TEST);
 
   gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -168,42 +161,49 @@ function drawScene() {
   mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
 
   mat4.identity(mvMatrix);
-
-  drawTriangle({
-    position: [-1.5, 0.0, -7.0]
-  })
-
-  drawSquare({
-    position: [3.0, 0.0, 0.0]
-  })
-
-  function drawTriangle(triangle) {
-    mat4.translate(mvMatrix, triangle.position);
-    gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-    setMatrixUniforms();
-    gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
-  }
-
-  function drawSquare(square) {
-    mat4.translate(mvMatrix, square.position);
-    gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-    setMatrixUniforms();
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numItems);
-  }
 }
 
 
 
+function drawShape(shape) {
+  var vertexPositionBuffer = bufferVerticies(shape.verticies)
+
+  mat4.translate(mvMatrix, shape.position);
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+  gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+  setMatrixUniforms();
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, shape.pointCount);
+}
+
+
 function webGLStart() {
+
   var canvas = document.getElementById("lesson01-canvas");
   initGL(canvas);
   initShaders();
-  initBuffers();
 
+  setCamera()
 
-  drawScene();
+  drawShape({
+    position: [-1.5, 0.0, -7.0],
+    verticies: [
+       0.0,  1.0,  0.0,
+      -1.0, -1.0,  0.0,
+       1.0, -1.0,  0.0
+    ],
+    pointCount: 3
+  })
+
+  drawShape({
+    position: [3.0, 0.0, 0.0],
+    verticies: [
+       1.0,  1.0,  0.0,
+      -1.0,  1.0,  0.0,
+       1.0, -1.0,  0.0,
+      -1.0, -1.0,  0.0
+    ],
+    pointCount: 4
+  })
 }
 
 webGLStart()
