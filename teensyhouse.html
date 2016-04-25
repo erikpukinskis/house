@@ -8,7 +8,7 @@
 
 <script src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/230211/glmatrix.min.js"></script>
 
-<script id="poly-shadow" type="x-shader/x-fragment">
+<script id="fill-shader" type="x-shader/x-fragment">
     precision mediump float;
 
     void main(void) {
@@ -16,7 +16,7 @@
     }
 </script>
 
-<script id="poly-direct-sun" type="x-shader/x-fragment">
+<script id="geometry-shader" type="x-shader/x-fragment">
     precision mediump float;
 
     void main(void) {
@@ -95,14 +95,14 @@ function getShader(gl, id) {
 var shaderProgram;
 
 function initShaders() {
-  var polyShadowShader = getShader(gl, "poly-shadow");
-  var polyDirectSunShader = getShader(gl, "poly-direct-sun");
+  var fillShader = getShader(gl, "fill-shader");
+  var geometryShader = getShader(gl, "geometry-shader");
   var setPositionShader = getShader(gl, "set-position-shader");
 
   shaderProgram = gl.createProgram();
   gl.attachShader(shaderProgram, setPositionShader);
-  gl.attachShader(shaderProgram, polyShadowShader);
-  // gl.attachShader(shaderProgram, polyDirectSunShader);
+  gl.attachShader(shaderProgram, fillShader);
+  // gl.attachShader(shaderProgram, geometryShader);
   gl.linkProgram(shaderProgram);
 
   if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
@@ -176,7 +176,7 @@ function drawShape(shape) {
 }
 
 
-function webGLStart() {
+function drawWindow() {
 
   var canvas = document.getElementById("lesson01-canvas");
   initGL(canvas);
@@ -206,7 +206,7 @@ function webGLStart() {
   })
 }
 
-webGLStart()
+drawWindow()
 
 </script>
 
