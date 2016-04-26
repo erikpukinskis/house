@@ -33,7 +33,7 @@
 </script>
 
 
-<canvas id="lesson01-canvas" style="border: none;" width="300" height="300"></canvas>
+<canvas style="background: #eee; border: none;" width="300" height="300"></canvas>
 
 </body>
 
@@ -129,16 +129,16 @@ function setMatrixUniforms() {
 
 
 
-var squareVertexPositionBuffer;
+function setBufferSize(buffer, size, count) {
+  buffer.itemSize = size;
+  buffer.numItems = count;
+}
 
-
-function bufferPosition(verticies) {
+function bufferPosition(verticies, count) {
   vertexPositionBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verticies), gl.STATIC_DRAW);
-  vertexPositionBuffer.itemSize = 3;
-  vertexPositionBuffer.numItems = 3;
-
+  setBufferSize(vertexPositionBuffer, 3, count)
   return vertexPositionBuffer
 }
 
@@ -148,8 +148,7 @@ function bufferColors(colors, count) {
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
 
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-  vertexColorBuffer.itemSize = 4;
-  vertexColorBuffer.numItems = count;
+  setBufferSize(vertexColorBuffer, 4, count)
 
   return vertexColorBuffer
 }
@@ -170,7 +169,7 @@ function setCamera() {
 
 
 function drawShape(shape) {
-  var vertexPositionBuffer = bufferPosition(shape.verticies)
+  var vertexPositionBuffer = bufferPosition(shape.verticies, shape.pointCount)
 
   var vertexColorBuffer = bufferColors(shape.colors, shape.pointCount)
 
@@ -188,6 +187,7 @@ function drawShape(shape) {
 
 
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
+
   gl.vertexAttribPointer(
     shaderProgram.vertexColorAttribute,
     vertexColorBuffer.itemSize,
@@ -201,16 +201,8 @@ function drawShape(shape) {
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, shape.pointCount);
 }
 
-
-function drawWindow() {
-
-  var canvas = document.getElementById("lesson01-canvas");
-  initGL(canvas);
-  initShaders();
-
-  setCamera()
-
-  drawShape({
+var shapes = [
+  {
     position: [-1.5, 0.0, -7.0],
     verticies: [
        0.0,  1.0,  0.0,
@@ -219,28 +211,40 @@ function drawWindow() {
     ],
     pointCount: 3,
     colors: [
-      1.0, 0.0, 0.0, 1.0,
-      0.0, 1.0, 0.0, 1.0,
-      0.0, 0.0, 1.0, 1.0
+      1.0, 0.4, 0.6, 1.0,
+      0.9, 0.4, 0.7, 1.0,
+      0.8, 0.4, 0.9, 1.0
     ]
-  })
-
-  drawShape({
+  },
+  {
     position: [3.0, 0.0, 0.0],
     verticies: [
-       1.0,  0.5,  0.0,
-      -1.0,  1.0,  0.3,
-       1.0, -.7,  0.0,
+       1.0,  1.0,  0.0,
+      -1.0,  1.0,  0.0,
+       1.0, -1.0,  0.0,
       -1.0, -1.0,  0.0
     ],
     pointCount: 4,
     colors: [
-      1.0, 0.0, 0.0, 1.0,
-      0.0, 0.5, 0.5, 1.0,
-      0.0, 1.0, 0.0, 1.0,
-      0.0, 0.0, 1.0, 1.0
+      1.0, 0.8, 0.2, 1.0,
+      0.9, 0.7, 0.4 , 1.0,
+      0.8, 0.7, 0.6, 1.0,
+      0.7, 0.6, 0.8, 1.0
     ]
-  })
+  }
+]
+
+function drawWindow() {
+
+  var canvas = document.querySelector("canvas");
+  initGL(canvas);
+  initShaders();
+
+  setCamera()
+
+  for(var i=0; i<shapes.length; i++) {
+    drawShape(shapes[i])
+  }
 }
 
 drawWindow()
