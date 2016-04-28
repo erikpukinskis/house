@@ -3,6 +3,11 @@
 <body>
 
 <script src="gl-matrix.js"></script>
+<script src="../build/he.js"></script>
+<script src="../build/element.js"></script>
+<script src="../build/add-html.js"></script>
+<script src="../build/function-call.js"></script>
+<script src="../build/make-it-editable.js"></script>
 
 
 <script id="fill-shader" type="x-shader/x-fragment">
@@ -19,13 +24,13 @@
     attribute vec3 aVertexPosition;
     attribute vec4 aVertexColor;
 
-    uniform mat4 uMVMatrix;
+    uniform mat4 uniformMoveMatrix;
     uniform mat4 uniformCameraMatrix;
 
     varying vec4 vColor;
 
     void main(void) {
-        gl_Position = uniformCameraMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+        gl_Position = uniformCameraMatrix * uniformMoveMatrix * vec4(aVertexPosition, 1.0);
         vColor = aVertexColor;
     }
 </script>
@@ -112,7 +117,7 @@ function initShaders() {
   gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
 
   shaderProgram.cameraMatrixUniform = gl.getUniformLocation(shaderProgram, "uniformCameraMatrix");
-  shaderProgram.moveMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+  shaderProgram.moveMatrixUniform = gl.getUniformLocation(shaderProgram, "uniformMoveMatrix");
 }
 
 
@@ -121,6 +126,7 @@ var cameraMatrix = mat4.create();
 
 function setMatrixUniforms() {
   gl.uniformMatrix4fv(shaderProgram.cameraMatrixUniform, false, cameraMatrix);
+
   gl.uniformMatrix4fv(shaderProgram.moveMatrixUniform, false, moveMatrix);
 }
 
@@ -219,6 +225,12 @@ var shapes = [
   }
 ]
 
+function getShapeData(shapeId, key, i) {
+  return shapes[shapeId][key][i]
+}
+
+
+
 function drawWindow() {
 
   var canvas = document.querySelector("canvas");
@@ -239,7 +251,97 @@ function drawWindow() {
   }
 }
 
+
+
+var button = element.template.container(
+  ".button",
+  element.style({
+    "font-family": "sans-serif",
+    "padding": "8px 12px 10px 12px",
+    "display": "inline-block",
+    "font-size": "11pt"
+  })
+)
+
+var valueTemplate = element.template(
+  button,
+  ".value",
+  element.style({
+    "background": "pink",
+    "margin-right": "10px"
+  }),
+  function(value, shapeId, key, i) {
+    this.children = [element.raw(""+value)]
+
+    makeItEditable(
+      this,
+      functionCall(getShapeData).withArgs(shapeId, key, i)
+    )
+  }
+)
+
+var shapeTemplate = element.template(
+  ".shape-code",
+  element.style({
+    "background": "#fafafa",
+    "margin-bottom": "10px",
+    "max-width": "300px"
+  }),
+  function(shape, id) {
+
+    this.children = [
+      inputs(id, "position", shape.position),
+      inputs(id, "verticies", shape.verticies),
+      inputs(id, "colors", shape.colors),
+      inputs(id, "pointCount", [shape.pointCount])
+    ]
+
+  }
+)
+
+var inputs = element.template(
+  ".inputs",
+  element.style({
+    "margin-bottom": "10px" 
+  }),
+  function inputs(shapeId, key, values) {
+    this.children.push(button(key))
+
+    for(var i=0; i<values.length; i++) {
+      valueElement = valueTemplate(values[i], shapeId, key, i)
+
+      this.children.push(valueElement)
+    }
+  }
+)
+
+
+function drawCode(shapes) {
+  addHtml(
+    element.stylesheet(
+      valueTemplate,
+      shapeTemplate,
+      button,
+      inputs
+    ).html()
+  )
+
+  for(var i=0; i<shapes.length; i++) {
+    var shape = shapes[i]
+    var el = shapeTemplate(shape, i)
+    addHtml(el.html())
+  }
+
+}
+
+
+
+
+
 drawWindow()
+
+drawCode(shapes)
+
 
 </script>
 
