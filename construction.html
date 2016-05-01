@@ -1,0 +1,218 @@
+<script id="lumber-list" type="text/lumber-list">
+floor
+
+8 foot 2x6 side joists: 2
+8 foot 2x4 center joists: 1
+6 foot 2x6 caps: 2
+6 foot 2x4 cross joists: 3
+8 foot 1x4 floorboards: 21
+
+side walls (2)
+
+7 foot 2x2 corners: 2
+8 foot 2x2 corners: 2
+
+front wall
+
+80 inch 2x2 corners: 1
+32 inch 2x2 plates: 2
+
+front header
+
+8 foot 2x2 plates: 2
+16 inch 2x2 corners: 2
+
+door frame
+
+8 foot 1x4 plates: 2
+80 inch 1x2 posts: 2
+
+interior front wall
+
+80 inch 1x2 corners: 2
+32 inch 1x2 plates: 2
+
+rear wall
+
+8 foot 2x2 plates: 3
+7 foot 2x2 corners: 3
+4 foot 2x2 corners: 1
+3 foot 1x2 corners: 1
+
+window frame
+32 inch 1x4 plates: 2
+
+16x48 1/4 inch polycarbonate sheet: 2
+32x80 1/4 inch polycarbonate sheet: 2
+4x8 dual wall poly: 2
+8 foot 1x8 ridge: 3
+
+1/4 inch ball bearings: dozen
+</script>
+
+<script type="text/javascript">
+var lumberList = getScriptContent(document.getElementById("lumber-list"))
+
+function getScriptContent(shaderScript) {
+
+  if (!shaderScript) {
+    return null;
+  }
+
+  var str = "";
+  var k = shaderScript.firstChild;
+  while (k) {
+    if (k.nodeType == 3) {
+      str += k.textContent;
+    }
+    k = k.nextSibling;
+  }
+  return str
+}
+
+
+var lines = lumberList.split("\n")
+var needs = {
+  "8 foot 2x4": 0,
+  "8 foot 2x6": 0,
+}
+
+
+lines.forEach(function(line) {
+  var hasQuantity = !!line.match(":")
+  if (!hasQuantity) { return }
+
+  var isNBy = !!line.match(/[0-9]x[0-9]/)
+  if (!isNBy) { 
+    console.log("SKIPPED", line)
+    return 
+  }
+
+  parseLine(line)
+})
+
+console.log("we need", needs)
+
+
+function parseLine(line) {
+  var parts = line.split(": ")
+  var description = parts[0]
+  var quantity = parseInt(parts[1])
+
+  parts = description.match(/ *([0-9]+) +([a-z]+) +([0-9]+)x([0-9]+) +([a-z ]+[a-z]) */)
+
+  if (!parts) {
+    console.log("SKIPPED", line)
+    return
+  }
+  var thickness = parseInt(parts[3])
+  var width = parseInt(parts[4])
+  var crossDescription = thickness+"x"+width
+
+  var piece = {
+    description: description,
+    length: parseInt(parts[1]),
+    lengthUnits: parts[2],
+    crossDescription: crossDescription,
+    thicknessInInches: thickness,
+    widthInInches: width,
+    purpose: parts[5]
+  }
+
+  if (piece.lengthUnits == "inch") {
+    var lengthInFeet = piece.length / 12.0
+  } else {
+    lengthInFeet = piece.length
+  }
+
+  var isStock = thickness == 2 && (width == 4 || width == 6)
+
+  var isTwoByTwo = thickness == 2 && width == 2
+
+  var isOneByTwo = thickness == 1 && width == 2
+
+  var isOneByFour = thickness == 1 && width == 4
+
+  var stockThickness = 2
+
+  if (isOneByFour) {
+
+    var stockWidth = 4  
+
+    if (lengthInFeet <= 4) {
+      var stockLength = 8
+      var stockQuantity = quantity/4
+    } else if (lengthInFeet > 8) {
+      throw new Error("don't know how to make long 1x4")
+    } else {
+      stockLength = 8
+      stockQuantity = quantity/2
+    }
+
+  } else if (isOneByTwo) {
+
+    var stockWidth = 4  
+
+    if (lengthInFeet <= 4) {
+      var stockLength = 8
+      var stockQuantity = quantity/8
+    } else if (lengthInFeet > 8) {
+      throw new Error("don't know how to make long 1x2")
+    } else {
+      stockLength = 8
+      stockQuantity = quantity/4
+    }
+
+  } else if (isTwoByTwo) {
+
+    var stockWidth = 4
+
+    if (lengthInFeet <= 4) {
+      var stockLength = 8
+      var stockQuantity = quantity/4
+    } else if (lengthInFeet > 8) {
+      throw new Error("don't know how to make long 2x2")
+    } else {
+      stockLength = 8
+      stockQuantity = quantity/2
+    }
+
+  } else if (isStock) {
+
+    var stockWidth = width
+
+    if (piece.length <= 4) {
+      var stockLength = 8
+      var stockQuantity = quantity/2
+    // } else if (piece.length <= 6) {
+    //   stockLength = 12
+    //   stockQuantity = quantity/2
+    } else {
+      stockLength = 8
+      stockQuantity = quantity
+    }
+
+  } else {
+    console.log("don't know what to do with piece:", piece.description)
+    return
+  }
+
+  var stockDescription = ""
+    + stockLength
+    + " foot "
+    + stockThickness
+    + "x"
+    + stockWidth
+
+  if (typeof needs[stockDescription] == "undefined") {
+    throw new Error("add "+stockDescription+" to needs keys")
+  }
+
+  needs[stockDescription] += stockQuantity
+
+  console.log("to make <"+quantity+"x "+piece.description+"> we need "+stockQuantity+"x "+stockDescription)
+
+
+}
+
+</script>
