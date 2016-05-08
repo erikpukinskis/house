@@ -1,15 +1,15 @@
 
 <html>
-<body>
+<body></body>
 
-<script src="gl-matrix.js"></script>
-<script src="../build/he.js"></script>
+<canvas style="border: none;" width="300" height="300"></canvas>
+
+
 <script src="../build/element.js"></script>
 <script src="../build/add-html.js"></script>
 <script src="../build/function-call.js"></script>
 <script src="../build/make-it-editable.js"></script>
-<script src="draw-scene.js"></script>
-
+<script src="../build/draw-scene.js"></script>
 
 <script id="fill-shader" type="x-shader/x-fragment">
     precision mediump float;
@@ -25,33 +25,57 @@
     attribute vec3 aVertexPosition;
     attribute vec4 aVertexColor;
 
-    uniform mat4 uniformMoveMatrix;
-    uniform mat4 uniformCameraMatrix;
+    uniform mat4 uniformModelViewMatrix;
+    uniform mat4 uniformProjectionMatrix;
 
     varying vec4 vColor;
 
     void main(void) {
-        gl_Position = uniformCameraMatrix * uniformMoveMatrix * vec4(aVertexPosition, 1.0);
+        gl_Position = uniformProjectionMatrix * uniformModelViewMatrix * vec4(aVertexPosition, 1.0);
         vColor = aVertexColor;
     }
 </script>
 
-<canvas style="border: none;" width="300" height="300"></canvas>
-
-</body>
-
 <script>
-
-
-
-
-
-
 
 // Our world
 
+// var shapes = [
+//   {
+//     position: [-1.5, 0.0, -7.0],
+//     verticies: [
+//        0.0,  1.0,  0.0,
+//       -1.0, -1.0,  0.0,
+//        1.0, -1.0,  0.0
+//     ],
+//     pointCount: 3,
+//     colors: [
+//       1.0, 0.4, 0.6, 1.0,
+//       0.9, 0.4, 0.7, 1.0,
+//       0.8, 0.4, 0.9, 1.0
+//     ]
+//   },
+//   {
+//     position: [3.0, 0.0, 0.0],
+//     verticies: [
+//        1.0,  1.0,  0.0,
+//       -1.0,  1.0,  0.0,
+//        1.0, -1.0,  0.0,
+//       -1.0, -1.0,  0.0
+//     ],
+//     pointCount: 4,
+//     colors: [
+//       1.0, 0.8, 0.2, 1.0,
+//       0.9, 0.7, 0.4 , 1.0,
+//       0.8, 0.7, 0.6, 1.0,
+//       0.7, 0.6, 0.8, 1.0
+//     ]
+//   },
+// ]
+
 var shapes = [
   {
+    name: "triangle",
     position: [-1.5, 0.0, -7.0],
     verticies: [
        0.0,  1.0,  0.0,
@@ -66,6 +90,7 @@ var shapes = [
     ]
   },
   {
+    name: "square",
     position: [3.0, 0.0, 0.0],
     verticies: [
        1.0,  1.0,  0.0,
@@ -80,7 +105,7 @@ var shapes = [
       0.8, 0.7, 0.6, 1.0,
       0.7, 0.6, 0.8, 1.0
     ]
-  }
+  },
 ]
 
 function getShapeData(shapeId, key, i) {
@@ -89,12 +114,8 @@ function getShapeData(shapeId, key, i) {
 
 function setShapeData(shapeId, key, i, value) {
   shapes[shapeId][key][i] = value
-  drawScene(shapes)
+  render()
 }
-
-
-
-
 
 
 
@@ -114,7 +135,7 @@ var valueTemplate = element.template(
   button,
   ".value",
   element.style({
-    "background": "pink",
+    "background": "white",
     "margin-right": "10px"
   }),
   function(value, shapeId, key, i) {
@@ -136,6 +157,12 @@ var shapeTemplate = element.template(
     "max-width": "300px"
   }),
   function(shape, id) {
+    this.attributes.style = 
+    "color: rgb("
+    +parseInt(shape.colors[0]*255)+","
+    +parseInt(shape.colors[1]*255)+","
+    +parseInt(shape.colors[2]*255)
+    +");"
 
     this.children = [
       inputs(id, "position", shape.position),
@@ -170,7 +197,8 @@ function drawCode(shapes) {
       valueTemplate,
       shapeTemplate,
       button,
-      inputs
+      inputs,
+      cameraPosition
     ).html()
   )
 
@@ -182,12 +210,61 @@ function drawCode(shapes) {
 
 }
 
+var cameraPosition = element.template.container(
+  ".camera-position.button",
+  element.style({
+    "background": "#bbf",
+    "color": "white",
+    "margin": "0 10px 10px 0",
+    "cursor": "pointer"
+  }),
+  function(name) {
+    this.onclick(
+      functionCall(setCameraPosition)
+      .withArgs(name)
+    )
+  }
+)
+
+var cameras = {}
+
+function setCameraPosition(name) {
+  if (!cameras[name]) {
+    throw new Error("No camera named "+name)
+  }
+  camera = cameras[name]
+  render()
+  console.log("rerendered")
+}
+
+function drawCameraPositions() {
+  addHtml(
+    element([
+      cameraPosition("front"),
+      cameraPosition("over the shoulder")
+    ]).html()
+  )
+}
+
+var camera = {
+  fovy: 45,
+  near: 0.1,
+  far: 100.0,
+  pitch: 0.0,
+  yaw: 0.0,
+  xPos: 0.0,
+  yPos: 0.0,
+  zPos: 0.0  
+}
+
+function render() {
+  drawScene(shapes, camera)
+}
 
 
+render()
 
-makeItEditable.onBottomOfScreen()
-
-drawScene(shapes)
+drawCameraPositions()
 
 drawCode(shapes)
 

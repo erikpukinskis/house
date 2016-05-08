@@ -30,3 +30,206 @@ quat4.normalize=function(a,b){b||(b=a);var c=a[0],d=a[1],e=a[2],g=a[3],f=Math.sq
 quat4.multiplyVec3=function(a,b,c){c||(c=b);var d=b[0],e=b[1],g=b[2];b=a[0];var f=a[1],h=a[2];a=a[3];var i=a*d+f*g-h*e,j=a*e+h*d-b*g,k=a*g+b*e-f*d;d=-b*d-f*e-h*g;c[0]=i*a+d*-b+j*-h-k*-f;c[1]=j*a+d*-f+k*-b-i*-h;c[2]=k*a+d*-h+i*-f-j*-b;return c};quat4.toMat3=function(a,b){b||(b=mat3.create());var c=a[0],d=a[1],e=a[2],g=a[3],f=c+c,h=d+d,i=e+e,j=c*f,k=c*h;c=c*i;var l=d*h;d=d*i;e=e*i;f=g*f;h=g*h;g=g*i;b[0]=1-(l+e);b[1]=k-g;b[2]=c+h;b[3]=k+g;b[4]=1-(j+e);b[5]=d-f;b[6]=c-h;b[7]=d+f;b[8]=1-(j+l);return b};
 quat4.toMat4=function(a,b){b||(b=mat4.create());var c=a[0],d=a[1],e=a[2],g=a[3],f=c+c,h=d+d,i=e+e,j=c*f,k=c*h;c=c*i;var l=d*h;d=d*i;e=e*i;f=g*f;h=g*h;g=g*i;b[0]=1-(l+e);b[1]=k-g;b[2]=c+h;b[3]=0;b[4]=k+g;b[5]=1-(j+e);b[6]=d-f;b[7]=0;b[8]=c-h;b[9]=d+f;b[10]=1-(j+l);b[11]=0;b[12]=0;b[13]=0;b[14]=0;b[15]=1;return b};quat4.slerp=function(a,b,c,d){d||(d=a);var e=c;if(a[0]*b[0]+a[1]*b[1]+a[2]*b[2]+a[3]*b[3]<0)e=-1*c;d[0]=1-c*a[0]+e*b[0];d[1]=1-c*a[1]+e*b[1];d[2]=1-c*a[2]+e*b[2];d[3]=1-c*a[3]+e*b[3];return d};
 quat4.str=function(a){return"["+a[0]+", "+a[1]+", "+a[2]+", "+a[3]+"]"};
+
+
+var drawScene = (function() {
+  var gl;
+
+  function initGL(canvas) {
+    try {
+      gl = canvas.getContext("experimental-webgl");
+      gl.viewportWidth = canvas.width;
+      gl.viewportHeight = canvas.height;
+    } catch (e) {
+    }
+    if (!gl) {
+      throw new Error("Could not initialise WebGL, sorry :-(");
+    }
+  }
+
+  function getScriptContent(shaderScript) {
+
+    if (!shaderScript) {
+      return null;
+    }
+
+    var str = "";
+    var k = shaderScript.firstChild;
+    while (k) {
+      if (k.nodeType == 3) {
+        str += k.textContent;
+      }
+      k = k.nextSibling;
+    }
+    return str
+  }
+
+  function getShader(gl, id) {
+    var shaderScript = document.getElementById(id);
+    var str = getScriptContent(shaderScript)
+
+    var shader;
+    if (shaderScript.type == "x-shader/x-fragment") {
+      shader = gl.createShader(gl.FRAGMENT_SHADER);
+    } else if (shaderScript.type == "x-shader/x-vertex") {
+      shader = gl.createShader(gl.VERTEX_SHADER);
+    } else {
+      return null;
+    }
+
+    gl.shaderSource(shader, str);
+    gl.compileShader(shader);
+
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        throw new Error(gl.getShaderInfoLog(shader));
+        return null;
+    }
+
+    return shader;
+  }
+
+
+  var shaderProgram;
+
+  function initShaders() {
+    var fillShader = getShader(gl, "fill-shader");
+    var geometryShader = getShader(gl, "geometry-shader");
+
+    shaderProgram = gl.createProgram();
+    gl.attachShader(shaderProgram, geometryShader);
+    gl.attachShader(shaderProgram, fillShader);
+    gl.linkProgram(shaderProgram);
+
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+      throw new Error("Could not initialise shaders");
+    }
+
+    gl.useProgram(shaderProgram);
+
+    shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+    gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+
+    shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
+    gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
+
+    shaderProgram.projectionMatrixUniform = gl.getUniformLocation(shaderProgram, "uniformProjectionMatrix");
+    shaderProgram.modelViewMatrixUniform = gl.getUniformLocation(shaderProgram, "uniformModelViewMatrix");
+  }
+
+
+  var modelViewMatrix = mat4.create();
+  var projectionMatrix = mat4.create();
+
+  function setMatrixUniforms() {
+    gl.uniformMatrix4fv(shaderProgram.projectionMatrixUniform, false, projectionMatrix);
+
+    gl.uniformMatrix4fv(shaderProgram.modelViewMatrixUniform, false, modelViewMatrix);
+  }
+
+
+
+  function setBufferSize(buffer, size, count) {
+    buffer.itemSize = size;
+    buffer.numItems = count;
+  }
+
+  function bufferPosition(verticies, count) {
+    vertexPositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verticies), gl.STATIC_DRAW);
+    setBufferSize(vertexPositionBuffer, 3, count)
+    return vertexPositionBuffer
+  }
+
+  function bufferColors(colors, count) {
+
+    var vertexColorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
+
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+    setBufferSize(vertexColorBuffer, 4, count)
+
+    return vertexColorBuffer
+  }
+
+
+
+
+  function drawShape(shape) {
+    var vertexPositionBuffer = bufferPosition(shape.verticies, shape.pointCount)
+
+    var vertexColorBuffer = bufferColors(shape.colors, shape.pointCount)
+
+    mat4.translate(modelViewMatrix, shape.position);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+    gl.vertexAttribPointer(
+      shaderProgram.vertexPositionAttribute,
+      vertexPositionBuffer.itemSize,
+      gl.FLOAT,
+      false,
+      0,
+      0
+    );
+
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
+
+    gl.vertexAttribPointer(
+      shaderProgram.vertexColorAttribute,
+      vertexColorBuffer.itemSize,
+      gl.FLOAT,
+      false,
+      0,
+      0
+    );
+
+    setMatrixUniforms();
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, shape.pointCount);
+  }
+
+  var camera
+
+  function drawScene(shapes, cam) {
+    camera = cam
+    
+    var canvas = document.querySelector("canvas");
+    initGL(canvas);
+    initShaders();
+
+    gl.clearColor(1.0, 1.0, 1.0, 1.0);
+    gl.enable(gl.DEPTH_TEST);
+    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    mat4.perspective(camera.fovy, gl.viewportWidth / gl.viewportHeight, camera.near, camera.far, projectionMatrix);
+
+    mat4.rotate(
+      modelViewMatrix,
+      camera.pitch,
+      [1, 0, 0]
+    )
+
+    mat4.rotate(
+      modelViewMatrix,
+      camera.yaw,
+      [0, 1, 0]
+    )
+
+    mat4.translate(
+      modelViewMatrix,
+      [camera.xPos, camera.yPos, camera.zPos]
+    )
+
+    mat4.identity(modelViewMatrix);
+
+    for(var i=0; i<shapes.length; i++) {
+      drawShape(shapes[i])
+    }
+
+  }
+
+  drawScene.camera = camera
+
+  return drawScene
+})()
