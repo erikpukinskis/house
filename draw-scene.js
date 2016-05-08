@@ -260,6 +260,8 @@ var drawScene = (function() {
 
     // moveCamera()
 
+    var shapeStart = 0
+
     for(var i=0; i<shapes.length; i++) {
       var shape = shapes[i]
 
@@ -286,8 +288,9 @@ var drawScene = (function() {
       )
 
       setMatrixUniforms()
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, shape.pointCount)
+      gl.drawArrays(gl.TRIANGLE_STRIP, shapeStart, shape.pointCount)
 
+      shapeStart += shape.pointCount
 
     }
 

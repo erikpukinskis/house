@@ -9,7 +9,7 @@
 <script src="../build/add-html.js"></script>
 <script src="../build/function-call.js"></script>
 <script src="../build/make-it-editable.js"></script>
-<script src="../build/draw-scene.js"></script>
+<script src="draw-scene.js"></script>
 
 <script id="fill-shader" type="x-shader/x-fragment">
     precision mediump float;
@@ -42,24 +42,10 @@
 
 
 var shapes = [
-  {
-    name: "triangle",
-    position: [-1.5, 0.0, -7.0],
-    verticies: [
-       0.0,  1.0,  0.0,
-      -1.0, -1.0,  0.0,
-       1.0, -1.0,  0.0
-    ],
-    pointCount: 3,
-    colors: [
-      1.0, 0.4, 0.6, 1.0,
-      0.9, 0.4, 0.7, 1.0,
-      0.8, 0.4, 0.9, 1.0
-    ]
-  },
+
   {
     name: "square",
-    position: [3.0, 0.0, 0.0],
+    position: [-1.5, 0.0, -7.0],
     verticies: [
        1.0,  1.0,  0.0,
       -1.0,  1.0,  0.0,
@@ -74,7 +60,21 @@ var shapes = [
       0.7, 0.6, 0.8, 1.0
     ]
   },
-]
+  {
+    name: "triangle",
+    position: [3.0, 0.0, 0.0],
+    verticies: [
+       0.0,  1.0,  0.0,
+      -1.0, -1.0,  0.0,
+       1.0, -1.0,  0.0
+    ],
+    pointCount: 3,
+    colors: [
+      1.0, 0.4, 0.6, 1.0,
+      0.9, 0.4, 0.7, 1.0,
+      0.8, 0.4, 0.9, 1.0
+    ]
+  },]
 
 function getShapeData(shapeId, key, i) {
   return shapes[shapeId][key][i]
