@@ -206,17 +206,28 @@ var cameras = {
     yPos: 0.4,
     zPos: 0.0  
   },
+  // "front": {
+  //   fovy: 10,
+  //   near: 0.1,
+  //   far: 100.0,
+  //   pitch: 0.0,
+  //   yaw: 45.0,
+  //   xPos: 6.0,
+  //   yPos: 0.5,
+  //   zPos: 0.0  
+  // },
   "over the shoulder": {
-    fovy: 45,
+    fovy: 10,
     near: 0.1,
     far: 100.0,
-    pitch: 0.0,
-    yaw: 10.0,
-    xPos: 0.0,
-    yPos: 0.4,
-    zPos: 0.0  
-  }
+    pitch: 10.0,
+    yaw: 45.0,
+    xPos: 20.0,
+    yPos: -4.5,
+    zPos: -13.0  
+  },
 }
+var camera = cameras["over the shoulder"]
 
 
 function setCameraPosition(name) {
@@ -235,8 +246,6 @@ function drawCameraPositions() {
     ]).html()
   )
 }
-
-var camera = cameras["front"]
 
 function render() {
   drawScene.buffer(shapes)
