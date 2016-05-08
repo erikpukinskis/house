@@ -179,25 +179,6 @@ var drawScene = (function() {
     return degrees * Math.PI / 180;
   }
 
-  function moveCamera() {
-    mat4.rotate(
-      modelViewMatrix,
-      degToRad(camera.pitch),
-      [1, 0, 0]
-    )
-
-    mat4.rotate(
-      modelViewMatrix,
-      degToRad(camera.yaw),
-      [0, 1, 0]
-    )
-
-    mat4.translate(
-      modelViewMatrix,
-      [camera.xPos, camera.yPos, camera.zPos]
-    )
-  }
-
   function drawScene(shapes, cam) {
     camera = cam
 
@@ -215,7 +196,9 @@ var drawScene = (function() {
 
       mat4.identity(modelViewMatrix)
 
-      moveCamera()
+      mat4.rotate(modelViewMatrix, degToRad(camera.pitch), [1, 0, 0])
+      mat4.rotate(modelViewMatrix, degToRad(camera.yaw), [0, 1, 0])
+      mat4.translate(modelViewMatrix, [camera.xPos, camera.yPos, camera.zPos])
 
       mat4.translate(modelViewMatrix, shape.position);
 
