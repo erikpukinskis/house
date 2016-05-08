@@ -46,22 +46,39 @@ var shapes = fields
 function polycarbonate(width, height, depth, position) {
 
   fields.push({
-    name: "square",
+    name: "front",
     position: [-1.5, 0.0, -7.0],
     verticies: [
-       1.0,  1.0,  0.0,
-      -1.0,  1.0,  0.0,
-       1.0, -1.0,  0.0,
-      -1.0, -1.0,  0.0
+      0.0,   0.0,     0.0,
+      width, 0.0,     0.0,
+      0.0,   height,  0.0,
+      width, height,  0.0,
     ],
     pointCount: 4,
     colors: [
-      0.6, 0.9, 0.7, 1.0,
-      0.7, 0.9, 0.8 , 1.0,
-      0.8, 0.9, 0.9, 1.0,
-      0.7, 0.9, 1.0, 1.0
+      0.7, 0.85, 0.9, 1.0,
+      0.7, 0.88, 0.9, 1.0,
+      0.9, 0.99, 0.96, 1.0,
+      0.9, 0.99, 0.9, 1.0,
     ]
+  })
 
+  fields.push({
+    name: "edge",
+    position: [-1.5, 0.0, -7.0],
+    verticies: [
+      0.0, 0.0,     -depth,
+      0.0, 0.0,     0.0,
+      0.0, height,  -depth,
+      0.0, height,  0.0,
+    ],
+    pointCount: 4,
+    colors: [
+      0.8, 1.0, 0.8, 1.0,
+      0.7, 0.8, 0.8, 1.0,
+      0.6, 0.6, 0.7, 1.0,
+      0.6, 0.5, 0.7, 1.0,
+    ]
   })
 }
 
@@ -123,7 +140,7 @@ function shapeColorStyle(shape) {
     +parseInt(shape.colors[0]*255)+","
     +parseInt(shape.colors[1]*255)+","
     +parseInt(shape.colors[2]*255)
-    +")"
+    +");"
 }
 
 var shapeTemplate = element.template(
@@ -213,27 +230,18 @@ var cameras = {
     yPos: 0.4,
     zPos: 0.0  
   },
-  // "front": {
-  //   fovy: 10,
-  //   near: 0.1,
-  //   far: 100.0,
-  //   pitch: 0.0,
-  //   yaw: 45.0,
-  //   xPos: 6.0,
-  //   yPos: 0.5,
-  //   zPos: 0.0  
-  // },
   "over the shoulder": {
-    fovy: 10,
+    fovy: 80,
     near: 0.1,
     far: 100.0,
-    pitch: 10.0,
+    pitch: 1.0,
     yaw: 45.0,
-    xPos: 20.0,
-    yPos: -4.5,
-    zPos: -13.0  
+    xPos: 40.0,
+    yPos: -40.5,
+    zPos: -55.0  
   },
 }
+
 var camera = cameras["over the shoulder"]
 
 
