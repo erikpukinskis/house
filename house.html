@@ -40,24 +40,12 @@
 
 // Our world
 
+var fields = [] // possible rename?
+var shapes = fields
 
-var shapes = [
-  {
-    name: "triangle",
-    position: [1.5, 0.0, -7.0],
-    verticies: [
-       0.0,  1.0,  0.0,
-      -1.0, -1.0,  0.0,
-       1.0, -1.0,  0.0
-    ],
-    pointCount: 3,
-    colors: [
-      1.0, 0.4, 0.6, 1.0,
-      0.9, 0.4, 0.7, 1.0,
-      0.8, 0.4, 0.9, 1.0
-    ]
-  },
-  {
+function polycarbonate(width, height, depth, position) {
+
+  fields.push({
     name: "square",
     position: [-1.5, 0.0, -7.0],
     verticies: [
@@ -68,21 +56,34 @@ var shapes = [
     ],
     pointCount: 4,
     colors: [
-      1.0, 0.8, 0.2, 1.0,
-      0.9, 0.7, 0.4 , 1.0,
-      0.8, 0.7, 0.6, 1.0,
-      0.7, 0.6, 0.8, 1.0
+      0.6, 0.9, 0.7, 1.0,
+      0.7, 0.9, 0.8 , 1.0,
+      0.8, 0.9, 0.9, 1.0,
+      0.7, 0.9, 1.0, 1.0
     ]
-  },
-]
+
+  })
+}
+
+var door = polycarbonate(32, 80, 0.25, [0,0,-0.5])
+
+
 
 function getShapeData(shapeId, key, i) {
   return shapes[shapeId][key][i]
 }
 
 function setShapeData(shapeId, key, i, value) {
-  shapes[shapeId][key][i] = value
+
+  var shape = shapes[shapeId]
+
+  shape[key][i] = value
+
   render()
+
+  var codeElement = document.getElementById(shapeId+"-shape-code")
+
+  codeElement.style.color = shapeColorStyle(shape)
 }
 
 
@@ -117,6 +118,14 @@ var valueTemplate = element.template(
   }
 )
 
+function shapeColorStyle(shape) {
+  return "rgb("
+    +parseInt(shape.colors[0]*255)+","
+    +parseInt(shape.colors[1]*255)+","
+    +parseInt(shape.colors[2]*255)
+    +")"
+}
+
 var shapeTemplate = element.template(
   ".shape-code",
   element.style({
@@ -125,14 +134,12 @@ var shapeTemplate = element.template(
     "max-width": "300px"
   }),
   function(shape, id) {
-    this.attributes.style = 
-    "color: rgb("
-    +parseInt(shape.colors[0]*255)+","
-    +parseInt(shape.colors[1]*255)+","
-    +parseInt(shape.colors[2]*255)
-    +");"
+    this.attributes.id = id+"-shape-code"
+
+    this.attributes.style = "color: "+shapeColorStyle(shape)
 
     this.children = [
+      element(".button", element.style({"font-size": "1.5em"}), shape.name),
       inputs(id, "position", shape.position),
       inputs(id, "verticies", shape.verticies),
       inputs(id, "colors", shape.colors),

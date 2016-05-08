@@ -203,24 +203,11 @@ var drawScene = (function() {
       mat4.translate(modelViewMatrix, shape.position);
 
       gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer)
-      gl.vertexAttribPointer(
-        shaderProgram.vertexPositionAttribute,
-        vertexPositionBuffer.itemSize,
-        gl.FLOAT,
-        false,
-        0,
-        0
-      )
+      gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0)
 
       gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer)
       gl.vertexAttribPointer(
-        shaderProgram.vertexColorAttribute,
-        vertexColorBuffer.itemSize,
-        gl.FLOAT,
-        false,
-        0,
-        0
-      )
+        shaderProgram.vertexColorAttribute, vertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0)
 
       setMatrixUniforms()
       gl.drawArrays(gl.TRIANGLE_STRIP, shapeStart, shape.pointCount)
