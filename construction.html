@@ -51,7 +51,6 @@ window frame
 </script>
 
 <script type="text/javascript">
-var lumberList = getScriptContent(document.getElementById("lumber-list"))
 
 function getScriptContent(shaderScript) {
 
@@ -71,30 +70,38 @@ function getScriptContent(shaderScript) {
 }
 
 
-var lines = lumberList.split("\n")
-var needs = {
-  "8 foot 2x4": 0,
-  "8 foot 2x6": 0,
-}
+function makeList() {
+  var lumberList = getScriptContent(document.getElementById("lumber-list"))
 
-
-lines.forEach(function(line) {
-  var hasQuantity = !!line.match(":")
-  if (!hasQuantity) { return }
-
-  var isNBy = !!line.match(/[0-9]x[0-9]/)
-  if (!isNBy) { 
-    console.log("SKIPPED", line)
-    return 
+  var lines = lumberList.split("\n")
+  var needs = {
+    "8 foot 2x4": 0,
+    "8 foot 2x6": 0,
   }
 
-  parseLine(line)
-})
 
-console.log("we need", needs)
+  lines.forEach(function(line) {
+    var hasQuantity = !!line.match(":")
+    if (!hasQuantity) { return }
 
+    var isNBy = !!line.match(/[0-9]x[0-9]/)
+    if (!isNBy) { 
+      console.log("SKIPPED", line)
+      return 
+    }
 
-function parseLine(line) {
+    parseLine(line, needs)
+  })
+
+  var count = needs["8 foot 2x4"]
+  console.log("need ", count, "2x4s, $"+parseInt(count*12))
+
+  count = needs["8 foot 2x6"]
+  console.log("need ", count, "2x6s, $"+parseInt(count*16))
+
+}
+
+function parseLine(line, needs) {
   var parts = line.split(": ")
   var description = parts[0]
   var quantity = parseInt(parts[1])
@@ -214,5 +221,7 @@ function parseLine(line) {
 
 
 }
+
+makeList()
 
 </script>

@@ -210,7 +210,7 @@ function drawCode(shapes) {
 
 }
 
-var cameraPosition = element.template.container(
+var cameraPosition = element.template(
   ".camera-position.button",
   element.style({
     "background": "#bbf",
@@ -219,6 +219,7 @@ var cameraPosition = element.template.container(
     "cursor": "pointer"
   }),
   function(name) {
+    this.children = [element(name+" camera")]
     this.onclick(
       functionCall(setCameraPosition)
       .withArgs(name)
@@ -226,13 +227,18 @@ var cameraPosition = element.template.container(
   }
 )
 
-var cameras = {}
+var cameras = {
+  "over the shoulder": {
+    pitch: 0.2
+  }
+}
+
 
 function setCameraPosition(name) {
-  if (!cameras[name]) {
+    if (!cameras[name]) {
     throw new Error("No camera named "+name)
   }
-  camera = cameras[name]
+  camera.yaw = cameras[name].yaw
   render()
   console.log("rerendered")
 }
@@ -253,7 +259,7 @@ var camera = {
   pitch: 0.0,
   yaw: 0.0,
   xPos: 0.0,
-  yPos: 0.0,
+  yPos: 0.4,
   zPos: 0.0  
 }
 
@@ -261,6 +267,8 @@ function render() {
   drawScene(shapes, camera)
 }
 
+
+drawScene.buffer(shapes)
 
 render()
 
