@@ -43,11 +43,11 @@
 var fields = [] // possible rename?
 var shapes = fields
 
-function polycarbonate(width, height, depth, position) {
+function polycarbonate(name, width, height, depth, position) {
 
   fields.push({
-    name: "front",
-    position: [-1.5, 0.0, -7.0],
+    name: name+" front",
+    position: position,
     verticies: [
       0.0,   0.0,     0.0,
       width, 0.0,     0.0,
@@ -64,8 +64,8 @@ function polycarbonate(width, height, depth, position) {
   })
 
   fields.push({
-    name: "edge",
-    position: [-1.5, 0.0, -7.0],
+    name: name+" edge",
+    position: position,
     verticies: [
       0.0, 0.0,     -depth,
       0.0, 0.0,     0.0,
@@ -82,7 +82,9 @@ function polycarbonate(width, height, depth, position) {
   })
 }
 
-var door = polycarbonate(32, 80, 0.25, [0,0,-0.5])
+polycarbonate("door 1", 32, 80, 0.25, [0,0,-0.5])
+
+polycarbonate("door 2", 32, 80, 0.25, [32,0,-1.0])
 
 
 
@@ -223,7 +225,7 @@ var cameras = {
   "front": {
     fovy: 45,
     near: 0.1,
-    far: 100.0,
+    far: 1000.0,
     pitch: 0.0,
     yaw: 0.0,
     xPos: 0.0,
@@ -231,14 +233,14 @@ var cameras = {
     zPos: 0.0  
   },
   "over the shoulder": {
-    fovy: 80,
+    fovy: 40,
     near: 0.1,
-    far: 100.0,
+    far: 1000.0,
     pitch: 1.0,
-    yaw: 45.0,
-    xPos: 40.0,
+    yaw: 35.0,
+    xPos: 80.0,
     yPos: -40.5,
-    zPos: -55.0  
+    zPos: -155.0  
   },
 }
 
