@@ -232,7 +232,7 @@ var cameras = {
     yPos: -40.5,
     zPos: -155.0  
   },
-  "over the shoulder": {
+  "perspective": {
     fovy: 40,
     near: 0.1,
     far: 1000.0,
@@ -256,12 +256,14 @@ function setCameraPosition(name) {
 }
 
 function drawCameraPositions() {
-  addHtml(
-    element([
-      cameraPosition("front"),
-      cameraPosition("over the shoulder")
-    ]).html()
-  )
+  var container = element()
+  for(var key in cameras) {
+    container.children.push(
+      cameraPosition(key)
+    )
+  }
+
+  addHtml(container.html())
 }
 
 function render() {
