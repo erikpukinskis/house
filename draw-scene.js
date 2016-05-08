@@ -208,14 +208,14 @@ var drawScene = (function() {
 
     mat4.perspective(camera.fovy, gl.viewportWidth / gl.viewportHeight, camera.near, camera.far, projectionMatrix);
 
-    mat4.identity(modelViewMatrix)
-
-    moveCamera()
-
     var shapeStart = 0
 
     for(var i=0; i<shapes.length; i++) {
       var shape = shapes[i]
+
+      mat4.identity(modelViewMatrix)
+
+      moveCamera()
 
       mat4.translate(modelViewMatrix, shape.position);
 
