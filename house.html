@@ -223,14 +223,14 @@ var cameraPosition = element.template(
 
 var cameras = {
   "front": {
-    fovy: 45,
+    fovy: 40,
     near: 0.1,
     far: 1000.0,
-    pitch: 0.0,
+    pitch: 1.0,
     yaw: 0.0,
-    xPos: 0.0,
-    yPos: 0.4,
-    zPos: 0.0  
+    xPos: -50.0,
+    yPos: -40.5,
+    zPos: -155.0  
   },
   "over the shoulder": {
     fovy: 40,
@@ -244,7 +244,7 @@ var cameras = {
   },
 }
 
-var camera = cameras["over the shoulder"]
+var camera = cameras["front"]
 
 
 function setCameraPosition(name) {
