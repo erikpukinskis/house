@@ -2,7 +2,7 @@
 <html>
 <body></body>
 
-<canvas style="border: none;" width="600" height="300"></canvas>
+<canvas style="border: 2px solid #888;" width="600" height="300"></canvas>
 
 
 <script src="../build/element.js"></script>
@@ -38,16 +38,155 @@
 
 <script>
 
-// Our scene
-
 var fields = [] // possible rename?
 var shapes = fields
 
-wood("plate front", 96, 1, 0.5, [0,-0.75,0])
-wood("plate core", 96, 0.5, 0.25, [0,-0.75,-0.5])
-polycarbonate("door 1", 32, 80, 0.25, [0,-0.25,-0.5])
-wood("plate back", 96, 1, 0.5, [0,-0.75,-0.75])
+var cameras = {
+  "front": {
+    fovy: 40,
+    near: 0.1,
+    far: 1000.0,
+    pitch: 1.0,
+    yaw: 0.0,
+    xPos: -50.0,
+    yPos: -40.5,
+    zPos: -155.0  
+  },
+  "perspective": {
+    fovy: 40,
+    near: 0.1,
+    far: 1000.0,
+    pitch: 1.0,
+    yaw: 35.0,
+    xPos: 80.0,
+    yPos: -40.5,
+    zPos: -155.0  
+  },
+  "door plate": {
+    fovy: 1,
+    near: 0.1,
+    far: 1000.0,
+    pitch: 13.1,
+    yaw: 35.0,
+    xPos: 350.0,
+    yPos: -145.5,
+    zPos: -505.0  
+  },
+  "second plate": {
+    fovy: 1,
+    near: 0.1,
+    far: 1000.0,
+    pitch: 13.1,
+    yaw: 35.0,
+    xPos: 310.0,
+    yPos: -145.5,
+    zPos: -505.0  
+  },
+  "third plate": {
+    fovy: 1.2,
+    near: 0.1,
+    far: 1000.0,
+    pitch: 13.1,
+    yaw: 35.0,
+    xPos: 300.0,
+    yPos: -155.5,
+    zPos: -540.0  
+  },
+}
 
+var camera = cameras["second plate"]
+
+
+
+// Our scene
+
+drawOrigin()
+
+wood("door plate back", 96, 0.75, 0.5, [0,-0.75,-1.3])
+wood("door 1 rail", 96, 0.5, 0.25, [0,-0.75,-1])
+
+wood("horizontal interdoor spacer", 64, 0.75, 0.25, [32,-0.75,-0.75])
+wood("vertical interdoor spacer", 1, 80, 0.25, [32,0,-0.75])
+polycarbonate("door 2", 32, 80, 0.25, [32,-0.25,-0.5])
+wood("door2 plate front", 64, 0.75, 0.5, [32,-0.75,0])
+
+wood("front wall left stud", 1, 80, 0.5, [64,0,0])
+
+polycarbonate("door 1", 32, 80, 0.25, [0,-0.25,-1.0])
+wood("door 1 plate front", 32, 0.75, 1, [0,-0.75,0])
+
+
+function drawOrigin() {
+  var size = 4
+  var start = 2.0
+  var length = 10
+
+  fields.push({
+    name: "x-axis",
+    position: [0,0,0],
+    verticies: [
+      start,   0.0,     0.0,
+      length,  0.0,     0.0,
+      start, 0.0, size,
+      length,  0.0, size,
+    ],
+    pointCount: 4,
+    colors: [
+      0.8, 1.0, 0.7, 1.0,
+      0.8, 1.0, 0.7, 1.0,
+      1.0, 1.0, 1.0, 1.0,
+      1.0, 1.0, 1.0, 1.0,
+    ]
+  })
+
+  fields.push({
+    name: "y-axis",
+    position: [0,0,0],
+    verticies: [
+      0.0,   start,     0.0,
+      -size,  start,     0.0,
+      0.0,  length, 0.0,
+      -size, length, 0.0,
+    ],
+    pointCount: 4,
+    colors: [
+      0.9, 0.9, 1.0, 1.0,
+      1.0, 1.0, 1.0, 1.0,
+      0.9, 0.9, 1.0, 1.0,
+      1.0, 1.0, 1.0, 1.0,
+    ]
+  })
+
+  fields.push({
+    name: "z-axis",
+    position: [0,0,0],
+    verticies: [
+      0.0,   0.0,     -start,
+      0.0,  -size,     -start,
+      0.0, 0.0, -length,
+      0.0,  -size, -length,
+    ],
+    pointCount: 4,
+    colors: [
+      0.85, 0.85, 0.85, 1.0,
+      1.0, 1.0, 1.0, 1.0,
+      0.85, 0.85, 0.85, 1.0,
+      1.0, 1.0, 1.0, 1.0,
+    ]
+  })
+}
+
+function x4() {
+  var arr = []
+  for(var i=0; i<arguments.length; i++) {
+    val = arguments[i]
+    arr[i] = val
+    arr[i+4] = val
+    arr[i+8] = val
+    arr[i+12] = val
+  }
+  return arr
+}
 
 
 // Materials
@@ -284,41 +423,6 @@ var cameraPosition = element.template(
   }
 )
 
-var cameras = {
-  "front": {
-    fovy: 40,
-    near: 0.1,
-    far: 1000.0,
-    pitch: 1.0,
-    yaw: 0.0,
-    xPos: -50.0,
-    yPos: -40.5,
-    zPos: -155.0  
-  },
-  "perspective": {
-    fovy: 40,
-    near: 0.1,
-    far: 1000.0,
-    pitch: 1.0,
-    yaw: 35.0,
-    xPos: 80.0,
-    yPos: -40.5,
-    zPos: -155.0  
-  },
-  "door plate": {
-    fovy: 1,
-    near: 0.1,
-    far: 1000.0,
-    pitch: 13.1,
-    yaw: 35.0,
-    xPos: 350.0,
-    yPos: -145.5,
-    zPos: -505.0  
-  },
-}
-
-var camera = cameras["door plate"]
-
 function setCameraPosition(name) {
   if (!cameras[name]) {
     throw new Error("No camera named "+name)
@@ -347,7 +451,7 @@ render()
 
 drawCameraPositions()
 
-drawCode(shapes)
+drawCode(shapes.slice(2,3))
 
 
 </script>

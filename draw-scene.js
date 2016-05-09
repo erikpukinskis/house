@@ -44,7 +44,7 @@ var drawScene = (function() {
       gl.viewportHeight = canvas.height;
 
       gl.clearColor(1.0, 1.0, 1.0, 1.0);
-      gl.enable(gl.DEPTH_TEST);
+      // gl.enable(gl.DEPTH_TEST);
 
     } catch (e) {
     }
