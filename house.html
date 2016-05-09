@@ -2,7 +2,7 @@
 <html>
 <body></body>
 
-<canvas style="border: none;" width="300" height="300"></canvas>
+<canvas style="border: none;" width="600" height="300"></canvas>
 
 
 <script src="../build/element.js"></script>
@@ -38,10 +38,19 @@
 
 <script>
 
-// Our world
+// Our scene
 
 var fields = [] // possible rename?
 var shapes = fields
+
+wood("plate front", 96, 1, 0.5, [0,-0.75,0])
+wood("plate core", 96, 0.5, 0.25, [0,-0.75,-0.5])
+polycarbonate("door 1", 32, 80, 0.25, [0,-0.25,-0.5])
+wood("plate back", 96, 1, 0.5, [0,-0.75,-0.75])
+
+
+
+// Materials
 
 function polycarbonate(name, width, height, depth, position) {
 
@@ -82,10 +91,64 @@ function polycarbonate(name, width, height, depth, position) {
   })
 }
 
-polycarbonate("door 1", 32, 80, 0.25, [0,0,-0.5])
+function wood(name, width, height, depth, position) {
 
-polycarbonate("door 2", 32, 80, 0.25, [32,0,-1.0])
+  fields.push({
+    name: name+" top",
+    position: position,
+    verticies: [
+      0.0,   height,  0.0,
+      width, height,  0.0,
+      0.0,   height,  -depth,
+      width, height,  -depth,
+    ],
+    pointCount: 4,
+    colors: [
+      1.0, 1.0, 0.9, 1.0,
+      1.0, 1.0, 0.9, 1.0,
+      1.0, 1.0, 0.9, 1.0,
+      1.0, 1.0, 0.9, 1.0,
+    ]
+  })
 
+  fields.push({
+    name: name+" front",
+    position: position,
+    verticies: [
+      0.0,   0.0,     0.0,
+      width, 0.0,     0.0,
+      0.0,   height,  0.0,
+      width, height,  0.0,
+    ],
+    pointCount: 4,
+    colors: [
+      0.8, 0.7, 0.5, 1.0,
+      0.8, 0.7, 0.5, 1.0,
+      0.8, 0.7, 0.5, 1.0,
+      0.8, 0.7, 0.5, 1.0,
+    ]
+  })
+
+  fields.push({
+    name: name+" side",
+    position: position,
+    verticies: [
+      0.0,  0.0,     0.0,
+      0.0,  0.0,     -depth,
+      0.0,  height,  0.0,
+      0.0,  height,  -depth,
+    ],
+    pointCount: 4,
+    colors: [
+      0.9, 0.75, 0.55, 1.0,
+      0.9, 0.75, 0.55, 1.0,
+      0.9, 0.75, 0.55, 1.0,
+      0.9, 0.75, 0.55, 1.0,
+    ]
+  })
+
+
+}
 
 
 function getShapeData(shapeId, key, i) {
@@ -242,10 +305,19 @@ var cameras = {
     yPos: -40.5,
     zPos: -155.0  
   },
+  "door plate": {
+    fovy: 1,
+    near: 0.1,
+    far: 1000.0,
+    pitch: 13.1,
+    yaw: 35.0,
+    xPos: 350.0,
+    yPos: -145.5,
+    zPos: -505.0  
+  },
 }
 
-var camera = cameras["front"]
-
+var camera = cameras["door plate"]
 
 function setCameraPosition(name) {
   if (!cameras[name]) {
